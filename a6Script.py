@@ -9,7 +9,6 @@ import a6
 import numpy as np
 import glob
 import imageIO as io
-from scipy import linalg
 
 def getPNGsInDir(path):
     fnames = glob.glob(path+"*.png")
@@ -49,7 +48,7 @@ def testComputeAndApplyHomographyPoster():
     pointListT=[np.array([170, 95, 1]), np.array([171, 238, 1]), np.array([233, 235, 1]), np.array([239, 94, 1])]
 
     listOfPairs=zip(pointListPoster, pointListT)
-    
+
     H = a6.computeHomography(listOfPairs)
     #print H
     a6.applyHomography(poster, green, H, True)
@@ -66,7 +65,7 @@ def testComputeAndApplyHomographyStata():
     HS=a6.computeHomography(listOfPairsS)
     #multiply by 0.2 to better show the transition
     out=im2*0.5
-    
+
     a6.applyHomography(im1, out, HS, True)
     io.imwrite(out, "stata_computeAndApplyHomography.png")
 
@@ -87,7 +86,6 @@ def testStitchScience():
     listOfPairs=zip(pointList1, pointList2)
     out = a6.stitch(im1, im2, listOfPairs)
     io.imwrite(out, "science_stitch.png")
-
 
 
 testApplyHomographyPoster()
