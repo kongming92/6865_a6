@@ -87,12 +87,39 @@ def testStitchScience():
     out = a6.stitch(im1, im2, listOfPairs)
     io.imwrite(out, "science_stitch.png")
 
+def testComputeNHomographies():
+    pointList1=[np.array([209, 218, 1]), np.array([425, 300, 1]), np.array([209, 337, 1]), np.array([396, 336, 1])]
+    pointList2=[np.array([232, 4, 1]), np.array([465, 62, 1]), np.array([247, 125, 1]), np.array([433, 102, 1])]
+    listOfPairs=zip(pointList1, pointList2)
+    h1 = a6.computeHomography(listOfPairs)
+    h2 = a6.computeNHomographies([listOfPairs], 1)
+    print h1, h2
 
-testApplyHomographyPoster()
-testComputeAndApplyHomographyPoster()
-testComputeAndApplyHomographyStata()
-testStitchStata()
-testStitchScience()
+def testNPano():
+    im1 = io.imread('vancouverPan/vancouver1.png')
+    im2 = io.imread('vancouverPan/vancouver2.png')
+    im3 = io.imread('vancouverPan/vancouver3.png')
 
+    pointList1=[np.array([316, 21, 1], dtype=np.float64), np.array([288, 173, 1], dtype=np.float64), np.array([178, 203, 1], dtype=np.float64), np.array([156, 82, 1], dtype=np.float64)]
+    pointList2=[np.array([313, 147, 1], dtype=np.float64), np.array([291, 293, 1], dtype=np.float64), np.array([172, 324, 1], dtype=np.float64), np.array([161, 198, 1], dtype=np.float64)]
+    listOfPairs1=zip(pointList1, pointList2)
+    pointList3=[np.array([300, 27, 1], dtype=np.float64), np.array([175, 145, 1], dtype=np.float64), np.array([160, 198, 1], dtype=np.float64), np.array([311, 171, 1], dtype=np.float64)]
+    pointList4=[np.array([283, 134, 1], dtype=np.float64), np.array([165, 254, 1], dtype=np.float64), np.array([149, 311, 1], dtype=np.float64), np.array([306, 273, 1], dtype=np.float64)]
+    listOfPairs2=zip(pointList3, pointList4)
+
+    listOfListOfPairs = [listOfPairs1, listOfPairs2]
+    listOfImages = [im1, im2, im3]
+    refIndex = 1
+    out = a6.stitchN(listOfImages, listOfListOfPairs, refIndex)
+    io.imwrite(out, "vancouver_stitchN.png")
+
+
+# testApplyHomographyPoster()
+# testComputeAndApplyHomographyPoster()
+# testComputeAndApplyHomographyStata()
+# testStitchStata()
+# testStitchScience()
+# testComputeNHomographies()
+testNPano()
 #***You can test on the first N images of a list by feeding im[:N] as the argument instead of im***
 

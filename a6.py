@@ -117,30 +117,63 @@ def stitch(im1, im2, listOfPairs):
     # That is, im2 should never appear distorted in the resulting panorama, only possibly translated.
     # Returns the stitched output (which may be larger than either input image).
     H = computeHomography(listOfPairs)
-    Hinv = linalg.inv(H)
     bbox = bboxUnion(computeTransformedBBox(im1.shape, H), [[0,0], [im2.shape[0], im2.shape[1]]])
-    transInv = linalg.inv(translate(bbox))
+    trans = translate(bbox)
+    transInv = linalg.inv(trans)
     out = np.zeros((bbox[1][0] - bbox[0][0], bbox[1][1] - bbox[0][1], 3))
     for y, x in imIter(out):
         yt, xt, wt = transInv.dot(np.array([y, x, 1.0]))
-        yp, xp, w = Hinv.dot(np.array([yt, xt, wt]))
-        yp, xp = (yp / w, xp / w)
-        if yp >= 0 and yp < im1.shape[0] and xp >= 0 and xp < im1.shape[1]:
-            out[y, x]=  interpolateLin(im1, yp, xp)
-        elif yt >= 0 and yt < im2.shape[0] and xt >= 0 and xt < im2.shape[1]:
+        if yt >= 0 and yt < im2.shape[0] and xt >= 0 and xt < im2.shape[1]:
             out[y, x] = interpolateLin(im2, yt, xt)
+    applyHomography(im1, out, trans.dot(H) , True)
     return out
 
 #######6.865 Only###############
 
 def applyHomographyFast(source, out, H, bilinear=False):
-    '''takes the image source, warps it by the homography H, and adds it to the composite out. This version should only iterate over the pixels inside the bounding box of source's image in out.'''
+    # takes the image source, warps it by the homography H, and adds it to the composite out.
+    # This version should only iterate over the pixels inside the bounding box of source's image in out.
+    pass
 
 def computeNHomographies(listOfListOfPairs, refIndex):
-    '''This function takes a list of N-1 listOfPairs and an index. It returns a list of N homographies corresponding to your N images. The input N-1 listOfPairs describes all of the correspondences between images I(i) and I(i+1). The index tells you which of the images should be used as a reference. The homography returned for the reference image should be the identity.'''
+    # This function takes a list of N-1 listOfPairs and an index.
+    # It returns a list of N homographies corresponding to your N images.
+    # The input N-1 listOfPairs describes all of the correspondences between images I(i) and I(i+1).
+    # The index tells you which of the images should be used as a reference.
+    # The homography returned for the reference image should be the identity.
+
+    H_i = []
+    N = len(listOfListOfPairs) + 1
+    for i, listOfPairs in enumerate(listOfListOfPairs):
+        H_i.append(computeHomography(listOfPairs))
+    homographies =  [np.zeros((3,3))] * N
+    homographies[refIndex] = np.identity(3)
+    for i in xrange(N):
+        if i < refIndex:
+            homographies[i] = reduce(lambda x, y: x.dot(y), H_i[i:refIndex], np.identity(3))
+        elif i > refIndex:
+            if refIndex == 0:
+                homographies[i] = reduce(lambda x, y: x.dot(linalg.inv(y)), H_i[i-1::-1], np.identity(3))
+            else:
+                homographies[i] = reduce(lambda x, y: x.dot(linalg.inv(y)), H_i[i-1:refIndex-1:-1], np.identity(3))
+    return homographies
 
 def compositeNImages(listOfImages, listOfH):
-    '''Computes the composite image. listOfH is of the form returned by computeNHomographies. Hint: You will need to deal with bounding boxes and translations again in this function.'''
+    # Computes the composite image. listOfH is of the form returned by computeNHomographies.
+    # Hint: You will need to deal with bounding boxes and translations again in this function.
+    bbox = computeTransformedBBox(listOfImages[0].shape, listOfH[0])
+    for img, H in zip(listOfImages, listOfH):
+        currentbbox = computeTransformedBBox(img.shape, H)
+        bbox = bboxUnion(currentbbox, bbox)
+    trans = translate(bbox)
+    out = np.zeros((bbox[1][0] - bbox[0][0], bbox[1][1] - bbox[0][1], 3))
+    for img, H in zip(listOfImages, listOfH):
+        applyHomography(img, out, trans.dot(H), True)
+    return out
 
 def stitchN(listOfImages, listOfListOfPairs, refIndex):
-    '''Takes a list of N images, a list of N-1 listOfPairs, and the index of a reference image. The listOfListOfPairs contains correspondences between each image Ii and image I(i+1). The function should return a completed panorama'''
+    # Takes a list of N images, a list of N-1 listOfPairs, and the index of a reference image.
+    # The listOfListOfPairs contains correspondences between each image Ii and image I(i+1).
+    # The function should return a completed panorama
+    homographies = computeNHomographies(listOfListOfPairs, refIndex)
+    return compositeNImages(listOfImages, homographies)
