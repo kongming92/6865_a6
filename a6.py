@@ -21,10 +21,7 @@ def clipY(im, y):
     return min(im.shape[0] - 1, max(y, 0))
 
 def pix(im, y, x):
-    if (x<0) or (x>=im.shape[1]) or (y<0) or (y>= im.shape[0]):
-        return np.array([0, 0, 0])
-    else:
-        return im[y, x]
+    return im[clipY(im, y), clipX(im, x)]
 
 def interpolateLin(im, y, x):
     # same as from previous assignment
