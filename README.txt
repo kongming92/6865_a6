@@ -11,4 +11,4 @@ What was most unclear/difficult?
 What was most exciting?
 {A6: your answer}
 For 6.865 what was the speed-up from using bounding boxes?
-{A7: your answer}
+{A7: 375-165 = 210 seconds}

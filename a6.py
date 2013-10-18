@@ -133,7 +133,18 @@ def stitch(im1, im2, listOfPairs):
 def applyHomographyFast(source, out, H, bilinear=False):
     # takes the image source, warps it by the homography H, and adds it to the composite out.
     # This version should only iterate over the pixels inside the bounding box of source's image in out.
-    pass
+    bbox = computeTransformedBBox(source.shape, H)
+    Hinv = linalg.inv(H)
+    for y in xrange(bbox[0][0], bbox[1][0]):
+        for x in xrange(bbox[0][1], bbox[1][1]):
+            yp, xp, w = Hinv.dot(np.array([y, x, 1.0]))
+            yp, xp = (yp / w, xp / w)
+            if yp >= 0 and yp < source.shape[0] and xp >= 0 and xp < source.shape[1]:
+                if bilinear:
+                    out[y, x] = interpolateLin(source, yp, xp)
+                else:
+                    out[y, x] = source[int(round(yp)), int(round(xp))]
+
 
 def computeNHomographies(listOfListOfPairs, refIndex):
     # This function takes a list of N-1 listOfPairs and an index.
@@ -168,7 +179,7 @@ def compositeNImages(listOfImages, listOfH):
     trans = translate(bbox)
     out = np.zeros((bbox[1][0] - bbox[0][0], bbox[1][1] - bbox[0][1], 3))
     for img, H in zip(listOfImages, listOfH):
-        applyHomography(img, out, trans.dot(H), True)
+        applyHomographyFast(img, out, trans.dot(H), True)
     return out
 
 def stitchN(listOfImages, listOfListOfPairs, refIndex):

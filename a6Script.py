@@ -9,6 +9,7 @@ import a6
 import numpy as np
 import glob
 import imageIO as io
+import time
 
 def getPNGsInDir(path):
     fnames = glob.glob(path+"*.png")
@@ -95,31 +96,59 @@ def testComputeNHomographies():
     h2 = a6.computeNHomographies([listOfPairs], 1)
     print h1, h2
 
-def testNPano():
+def testNPanoVancouver():
+    im0 = io.imread('vancouverPan/vancouver0.png')
     im1 = io.imread('vancouverPan/vancouver1.png')
     im2 = io.imread('vancouverPan/vancouver2.png')
     im3 = io.imread('vancouverPan/vancouver3.png')
+    im4 = io.imread('vancouverPan/vancouver4.png')
+    pointList1=[np.array([188, 52, 1], dtype=np.float64), np.array([116, 152, 1], dtype=np.float64), np.array([285, 136, 1], dtype=np.float64), np.array([254, 47, 1], dtype=np.float64)]
+    pointList2=[np.array([177, 204, 1], dtype=np.float64), np.array([92, 306, 1], dtype=np.float64), np.array([273, 288, 1], dtype=np.float64), np.array([241, 200, 1], dtype=np.float64)]
+    listOfPairs0=zip(pointList2, pointList1)
+    pointList3=[np.array([316, 21, 1], dtype=np.float64), np.array([288, 173, 1], dtype=np.float64), np.array([178, 203, 1], dtype=np.float64), np.array([156, 82, 1], dtype=np.float64)]
+    pointList4=[np.array([313, 147, 1], dtype=np.float64), np.array([291, 293, 1], dtype=np.float64), np.array([172, 324, 1], dtype=np.float64), np.array([161, 198, 1], dtype=np.float64)]
+    listOfPairs1=zip(pointList4, pointList3)
+    pointList5=[np.array([300, 27, 1], dtype=np.float64), np.array([175, 145, 1], dtype=np.float64), np.array([160, 198, 1], dtype=np.float64), np.array([311, 171, 1], dtype=np.float64)]
+    pointList6=[np.array([283, 134, 1], dtype=np.float64), np.array([165, 254, 1], dtype=np.float64), np.array([149, 311, 1], dtype=np.float64), np.array([306, 273, 1], dtype=np.float64)]
+    listOfPairs2=zip(pointList6, pointList5)
+    pointList7=[np.array([177, 9, 1], dtype=np.float64), np.array([168, 156, 1], dtype=np.float64), np.array([271, 10, 1], dtype=np.float64), np.array([306, 145, 1], dtype=np.float64)]
+    pointList8=[np.array([188, 166, 1], dtype=np.float64), np.array([163, 309, 1], dtype=np.float64), np.array([273, 170, 1], dtype=np.float64), np.array([311, 300, 1], dtype=np.float64)]
+    listOfPairs3=zip(pointList8, pointList7)
+    listOfListOfPairs = [listOfPairs3, listOfPairs2, listOfPairs1, listOfPairs0]
+    # listOfImages = [im0, im1, im2, im3, im4]
+    refIndex = 2
 
-    pointList1=[np.array([316, 21, 1], dtype=np.float64), np.array([288, 173, 1], dtype=np.float64), np.array([178, 203, 1], dtype=np.float64), np.array([156, 82, 1], dtype=np.float64)]
-    pointList2=[np.array([313, 147, 1], dtype=np.float64), np.array([291, 293, 1], dtype=np.float64), np.array([172, 324, 1], dtype=np.float64), np.array([161, 198, 1], dtype=np.float64)]
-    listOfPairs1=zip(pointList1, pointList2)
-    pointList3=[np.array([300, 27, 1], dtype=np.float64), np.array([175, 145, 1], dtype=np.float64), np.array([160, 198, 1], dtype=np.float64), np.array([311, 171, 1], dtype=np.float64)]
-    pointList4=[np.array([283, 134, 1], dtype=np.float64), np.array([165, 254, 1], dtype=np.float64), np.array([149, 311, 1], dtype=np.float64), np.array([306, 273, 1], dtype=np.float64)]
-    listOfPairs2=zip(pointList3, pointList4)
-
-    listOfListOfPairs = [listOfPairs1, listOfPairs2]
-    listOfImages = [im1, im2, im3]
-    refIndex = 1
+    listOfImages = [im4, im3, im2, im1, im0]
     out = a6.stitchN(listOfImages, listOfListOfPairs, refIndex)
-    io.imwrite(out, "vancouver_stitchN.png")
+    io.imwrite(out, "vancouver_stitchNFast2.png")
+
+def testNPanoGuedelon():
+    im1 = io.imread('guedelon/guedelon-1.png')
+    im2 = io.imread('guedelon/guedelon-2.png')
+    im3 = io.imread('guedelon/guedelon-3.png')
+    im4 = io.imread('guedelon/guedelon-4.png')
+    pointList1=[np.array([444, 306, 1], dtype=np.float64), np.array([198, 210, 1], dtype=np.float64), np.array([271, 198, 1], dtype=np.float64), np.array([399, 203, 1], dtype=np.float64)]
+    pointList2=[np.array([434, 114, 1], dtype=np.float64), np.array([188, 44, 1], dtype=np.float64), np.array([261, 24, 1], dtype=np.float64), np.array([394, 18, 1], dtype=np.float64)]
+    listOfPairs1=zip(pointList1, pointList2)
+    pointList3=[np.array([419, 293, 1], dtype=np.float64), np.array([384, 234, 1], dtype=np.float64), np.array([254, 274, 1], dtype=np.float64), np.array([301, 324, 1], dtype=np.float64)]
+    pointList4=[np.array([401, 142, 1], dtype=np.float64), np.array([372, 88, 1], dtype=np.float64), np.array([245, 139, 1], dtype=np.float64), np.array([292, 179, 1], dtype=np.float64)]
+    listOfPairs2=zip(pointList3, pointList4)
+    pointList5=[np.array([245, 139, 1], dtype=np.float64), np.array([403, 143, 1], dtype=np.float64), np.array([379, 220, 1], dtype=np.float64), np.array([273, 311, 1], dtype=np.float64)]
+    pointList6=[np.array([236, 70, 1], dtype=np.float64), np.array([398, 69, 1], dtype=np.float64), np.array([371, 149, 1], dtype=np.float64), np.array([267, 238, 1], dtype=np.float64)]
+    listOfPairs3=zip(pointList5, pointList6)
+    listOfImages = [im1, im2, im3, im4]
+    listOfListOfPairs = [listOfPairs1, listOfPairs2, listOfPairs3]
+    refIndex = 2
+    out = a6.stitchN(listOfImages, listOfListOfPairs, refIndex)
+    io.imwrite(out, "guedelon_stitchNFast2.png")
 
 
 # testApplyHomographyPoster()
 # testComputeAndApplyHomographyPoster()
 # testComputeAndApplyHomographyStata()
-# testStitchStata()
-# testStitchScience()
+testStitchStata()
+testStitchScience()
 # testComputeNHomographies()
-testNPano()
+# testNPanoVancouver()
 #***You can test on the first N images of a list by feeding im[:N] as the argument instead of im***
 
